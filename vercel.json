@@ -16,7 +16,7 @@
   ],
   "routes": [
     {
-      "src": "/send-location",
+      "src": "/(.*)",
       "dest": "/api/server.js"
     },
     {

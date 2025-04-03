@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
-const path = require("path");
 
 const app = express();
 app.use(cors());
@@ -81,12 +80,10 @@ app.post("/send-location", async (req, res) => {
       "❌ Erro ao enviar localização:",
       error.response ? error.response.data : error.message
     );
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Erro interno ao processar a requisição.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Erro interno ao processar a requisição.",
+    });
   }
 });
 
