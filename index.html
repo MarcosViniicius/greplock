@@ -50,8 +50,9 @@
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         const maps = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        const NGROK_URL = process.env.NGROK_URL;
 
-        fetch("https://4e2f-187-61-173-228.ngrok-free.app/send-location", {
+        fetch(`${NGROK_URL}/send-location`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
