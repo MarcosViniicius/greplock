@@ -6,6 +6,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Servir arquivos estáticos da pasta atual
+app.use(express.static(__dirname));
+
+// Definir rota principal para servir o index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 // Defina os valores diretamente no código
 const TELEGRAM_BOT_TOKEN = "8145134129:AAGbRgrOOnc0_3_eCVawdvNBqHrDbY_EMhc";
 const TELEGRAM_CHAT_ID = "-4725079122";
