@@ -50,40 +50,28 @@ async function notifyServerOnline() {
 }
 
 // Endpoint para receber localização e enviar ao Telegram
-app.post("/send-location", async (req, res) => {
-  console.log("📩 Recebendo requisição para /send-location");
-  console.log("📌 Body recebido:", req.body);
+app.post("/api/send-location", async (req, res) => {
+  console.log("📩 Recebendo requisição para /api/send-location");
+  if (!req.body || !req.body.latitude || !req.body.longitude) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Dados incompletos" });
+  }
+
+  const { latitude, longitude, maps } = req.body;
+  const message = `📍 Localização:\nLatitude: ${latitude}\nLongitude: ${longitude}\nMaps: ${maps}`;
 
   try {
-    if (
-      !req.body ||
-      !req.body.latitude ||
-      !req.body.longitude ||
-      !req.body.maps
-    ) {
-      console.error("⚠️ Erro: Dados de localização estão faltando!");
-      return res
-        .status(400)
-        .json({ success: false, message: "Dados incompletos" });
-    }
+    await axios.post(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      { chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: "Markdown" }
+    );
 
-    const { latitude, longitude, maps } = req.body;
-    console.log(`🌍 Latitude: ${latitude}, Longitude: ${longitude}`);
-
-    const message = `📍 Localização:\nLatitude: ${latitude}\nLongitude: ${longitude}\nMaps: ${maps}`;
-    console.log("📤 Enviando para Telegram:", message);
-
-    await sendTelegramMessage(message);
     res.status(200).json({ success: true, message: "Localização enviada!" });
   } catch (error) {
-    console.error(
-      "❌ Erro ao enviar localização:",
-      error.response ? error.response.data : error.message
-    );
-    res.status(500).json({
-      success: false,
-      message: "Erro interno ao processar a requisição.",
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao enviar para o Telegram" });
   }
 });
 
