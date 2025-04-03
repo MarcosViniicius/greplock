@@ -11,7 +11,12 @@ app.use(express.static(__dirname));
 
 // Definir rota principal para servir o index.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "index.html"), (err) => {
+    if (err) {
+      console.error("Erro ao servir index.html:", err);
+      res.status(500).send("Erro interno no servidor");
+    }
+  });
 });
 
 // Defina os valores diretamente no código
