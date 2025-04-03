@@ -39,12 +39,9 @@
       const dia = String(dataAtual.getDate()).padStart(2, "0");
       const mes = String(dataAtual.getMonth() + 1).padStart(2, "0");
       const ano = dataAtual.getFullYear();
-
-      const dataFormatada = `${dia}/${mes}/${ano}`;
-
-      document.getElementById("data-atual").textContent = dataFormatada;
-
-      console.log(dataAtual);
+      document.getElementById(
+        "data-atual"
+      ).textContent = `${dia}/${mes}/${ano}`;
 
       function sendLocation(position) {
         const latitude = position.coords.latitude;
